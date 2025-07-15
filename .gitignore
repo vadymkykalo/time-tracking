@@ -16,3 +16,9 @@ deps
 .rebar3
 _build/
 _checkouts/
+
+rebar3
+.rebar3/
+.erlang.cookie
+logs/
+config/runtime.config

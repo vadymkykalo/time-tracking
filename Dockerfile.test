@@ -1,0 +1,29 @@
+FROM erlang:25.0
+
+WORKDIR /app
+
+# Copy rebar.config for dependency installation
+COPY rebar.config ./
+
+# Install dependencies and meck for mocking
+RUN rebar3 get-deps
+RUN rebar3 update-deps
+RUN erl -noshell -eval 'application:ensure_all_started(rebar), rebar_cmd:do("get-deps", #{}).' -s init stop
+RUN cd deps && git clone https://github.com/eproxus/meck.git && cd meck && git checkout master && cd ../..
+
+# Copy application source code
+COPY src/ ./src/
+COPY config/ ./config/
+COPY include/ ./include/
+COPY test/ ./test/
+COPY priv/ ./priv/
+
+# Add test configuration
+COPY config/test.sys.config ./config/sys.config
+
+# Compile tests
+RUN rebar3 compile
+RUN rebar3 compile eunit
+
+# Run tests
+CMD ["rebar3", "eunit"]

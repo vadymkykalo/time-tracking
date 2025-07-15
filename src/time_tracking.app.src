@@ -1,0 +1,21 @@
+{application, time_tracking, [
+    {description, "Employee time tracking microservice"},
+    {vsn, "0.1.0"},
+    {registered, [time_tracking_sup]},
+    {mod, {time_tracking_app, []}},
+    {applications, [
+        kernel,
+        stdlib,
+        sasl,
+        crypto,
+        ssl,
+        inets,
+        epgsql,
+        amqp_client,
+        jiffy
+    ]},
+    {env, []},
+    {modules, []},
+    {licenses, ["MIT"]},
+    {links, []}
+]}.

@@ -1,0 +1,6 @@
+-sname time_tracking
+
+-setcookie time_tracking_cookie
+
++K true
++A30
