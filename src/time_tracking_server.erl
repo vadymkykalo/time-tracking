@@ -2,10 +2,13 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/0, handle_request/2]).
+-export([start_link/0, handle_request/2, process_request/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
+
+%% Helper functions (exported for testing)
+-export([parse_pg_array/1, format_seconds/1]).
 
 -define(SERVER, ?MODULE).
 
@@ -429,16 +432,18 @@ work_time_statistics(Limit) ->
 
 %% Helper functions
 
-% Convert Postgres array to Erlang list
-parse_pg_array(ArrayStr) ->
-    % Remove curly braces and split into elements
+% Parse PostgreSQL array string into Erlang list
+parse_pg_array(ArrayStr) when is_list(ArrayStr) ->
+    % Remove braces and split by comma
     TrimmedStr = string:trim(ArrayStr, both, "{}"),
-    Elements = string:tokens(TrimmedStr, ","),
-    [list_to_integer(Element) || Element <- Elements].
+    case TrimmedStr of
+        "" -> [];
+        _ -> [list_to_integer(string:trim(X)) || X <- string:tokens(TrimmedStr, ",")]
+    end.
 
-% Format seconds to readable format
-format_seconds(TotalSeconds) ->
+% Format seconds into human readable format (HH:MM:SS)
+format_seconds(TotalSeconds) when is_integer(TotalSeconds) ->
     Hours = TotalSeconds div 3600,
     Minutes = (TotalSeconds rem 3600) div 60,
     Seconds = TotalSeconds rem 60,
-    io_lib:format("~2..0B:~2..0B:~2..0B", [Hours, Minutes, Seconds]).
+    lists:flatten(io_lib:format("~2..0B:~2..0B:~2..0B", [Hours, Minutes, Seconds])).
